@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Adivinha o Desenho · Laboratório de Deep Learning</title>
+<meta name="description" content="Desenhe no navegador e veja uma rede neural pequena adivinhar o que é. Jogo, visualização por dentro da rede, erros, dados e resultados do Trabalho 02 de Deep Learning (Unisinos), com desenhos do Quick, Draw!.">
+<meta name="theme-color" content="#1D2369">
+<meta name="author" content="Epitácio Vicente do Nascimento Neto">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Adivinha o Desenho · Unisinos">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="Adivinha o Desenho: uma rede neural que reconhece rabiscos">
+<meta property="og:description" content="Desenhe um gato, um sol, uma casa... e veja a rede adivinhar em tempo real, direto no navegador.">
+<meta property="og:url" content="https://epineto.github.io/quickdraw-dl-unisinos/">
+<meta property="og:image" content="https://epineto.github.io/quickdraw-dl-unisinos/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Rabiscos de sol, casa e estrela com o palpite da rede neural">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="style.css">
+<script>document.documentElement.classList.add('js')</script>
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="cab">
+  <div class="cab-in">
+    <img class="logo" src="assets/logo_unisinos.png" alt="Unisinos" width="118" height="30">
+    <div class="titulos">
+      <p class="cab-t">Adivinha o Desenho</p>
+      <p class="cab-s">Laboratório de Deep Learning · Trabalho 02 · PPGCA/Unisinos</p>
+    </div>
+  </div>
+</header>
+
+<nav class="nav" aria-label="Seções">
+  <ul class="nav-in">
+    <li><a href="#inicio">Início</a></li>
+    <li><a href="#jogo">Jogo</a></li>
+    <li><a href="#como-funciona">Como funciona</a></li>
+    <li><a href="#erros">Erros</a></li>
+    <li><a href="#dados">Dados</a></li>
+    <li><a href="#resultados">Resultados</a></li>
+    <li><a href="#sobre">Sobre</a></li>
+  </ul>
+</nav>
+
+<main id="conteudo" tabindex="-1">
+<noscript><p class="aviso">Este laboratório precisa de JavaScript e de um servidor HTTP (ver README).</p></noscript>
+<p id="erro-carga" class="aviso" role="alert" hidden></p>
+
+<!-- ============================ INÍCIO ============================ -->
+<section id="inicio" class="sec" aria-labelledby="inicio-t">
+  <div class="hero"><div class="hero-in">
+    <div>
+      <img class="hero-logo" src="assets/logo_unisinos.png" alt="Unisinos" width="200" height="51">
+      <h2 id="inicio-t">Adivinha o Desenho: uma rede neural que reconhece rabiscos</h2>
+      <ul class="problema">
+        <li>Um rabisco de <strong>poucos segundos</strong> basta para uma pessoa dizer “isso é um gato”. Será que uma rede neural pequena consegue o mesmo?</li>
+        <li>Aqui, uma <strong>CNN</strong> (rede neural que olha a imagem em pedacinhos) escolhe entre <strong>18 categorias</strong> do dia a dia. Tudo roda <strong>no próprio navegador</strong>, sem enviar o desenho a lugar nenhum.</li>
+        <li>O caminho sugerido: <strong>desenhar</strong>, ver a rede <strong>por dentro</strong>, descobrir onde ela <strong>erra</strong> e conferir os <strong>números</strong>.</li>
+      </ul>
+      <p class="hero-cta"><a class="botao" href="#jogo">Quero desenhar</a> <a class="botao sec2" href="#como-funciona">Ver por dentro</a></p>
+    </div>
+    <figure class="palco" aria-label="Demonstração automática: um desenho se forma e a rede dá o palpite">
+      <canvas id="hero-canvas" width="300" height="300" role="img" aria-label="Desenho sendo feito sozinho"></canvas>
+      <figcaption class="palco-leg"><span class="palco-pergunta">A rede acha que é</span> <strong id="hero-palpite">...</strong> <span id="hero-conf" class="mini"></span></figcaption>
+    </figure>
+  </div>
+  <div class="hero-nums" id="hero-nums"></div></div>
+
+  <div class="grade3 passos">
+    <article class="cartao passo"><span class="passo-n">1</span><h3>Desenhar</h3><p>No <a href="#jogo">Jogo</a>, rabisque com o mouse ou com o dedo. A rede mostra os 5 palpites mais prováveis enquanto o traço é feito. Há também um modo desafio, com pontos e tempo.</p></article>
+    <article class="cartao passo"><span class="passo-n">2</span><h3>Olhar por dentro</h3><p>Em <a href="#como-funciona">Como funciona</a>, o desenho vira uma grade de 28 por 28 pontos e atravessa as camadas da rede. Um mapa de calor mostra quais partes do traço pesaram na decisão.</p></article>
+    <article class="cartao passo"><span class="passo-n">3</span><h3>Conferir</h3><p>Em <a href="#erros">Erros</a>, <a href="#dados">Dados</a> e <a href="#resultados">Resultados</a>, os números do trabalho: onde a rede confunde, quantos desenhos ela precisa e o que acontece com rabiscos fora do padrão.</p></article>
+  </div>
+</section>
+
+<!-- ============================ JOGO ============================ -->
+<section id="jogo" class="sec" aria-labelledby="jogo-t">
+  <h2 id="jogo-t">Jogo: desenhe e a rede adivinha</h2>
+  <p class="lead">Rabisque no quadro. A cada traço, a rede refaz o palpite. As 18 categorias possíveis estão listadas abaixo do quadro.</p>
+
+  <div class="modos" role="group" aria-label="Modo de jogo">
+    <button type="button" id="modo-livre" class="aba" aria-pressed="true">Modo livre</button>
+    <button type="button" id="modo-desafio" class="aba" aria-pressed="false">Modo desafio</button>
+  </div>
+
+  <div class="grade-jogo">
+    <div class="cartao quadro-cartao">
+      <div id="desafio-barra" class="desafio-barra" hidden>
+        <div class="desafio-topo">
+          <p class="desafio-alvo">Desenhe: <strong id="desafio-alvo">...</strong></p>
+          <p class="desafio-info"><span id="desafio-rodada">Rodada 1 de 5</span> · <span id="desafio-pontos">0 pontos</span></p>
+        </div>
+        <div class="tempo" aria-hidden="true"><div id="tempo-barra"></div></div>
+        <p class="mini" id="desafio-tempo-txt" aria-live="off">20 s</p>
+      </div>
+      <div class="quadro-wrap">
+        <canvas id="quadro" width="400" height="400" tabindex="0" role="img" aria-label="Quadro de desenho. Use o mouse ou o dedo para rabiscar. Sem mouse ou toque, use o botão Desenhar sozinho."></canvas>
+        <p id="quadro-dica" class="quadro-dica">Faça um rabisco aqui</p>
+        <div id="desafio-tela" class="desafio-tela" hidden></div>
+      </div>
+      <div class="botoes">
+        <button type="button" id="btn-desfazer" class="botao pequeno">Desfazer</button>
+        <button type="button" id="btn-limpar" class="botao pequeno">Limpar</button>
+        <span class="botoes-livre">
+          <label for="sel-forma" class="so-leitor">Desenho de exemplo</label>
+          <select id="sel-forma" class="campo"></select>
+          <button type="button" id="btn-sozinho" class="botao pequeno sec2">Desenhar sozinho</button>
+        </span>
+        <span class="botoes-desafio" hidden>
+          <button type="button" id="btn-comecar" class="botao pequeno">Começar desafio</button>
+          <button type="button" id="btn-pular" class="botao pequeno sec2" disabled>Pular</button>
+        </span>
+      </div>
+    </div>
+
+    <div class="cartao palpite-cartao">
+      <h3>Palpite da rede</h3>
+      <p id="palpite-frase" class="palpite-frase" aria-live="polite">Aguardando um rabisco.</p>
+      <ol id="top5" class="top5" aria-label="Cinco categorias mais prováveis">
+        <li><span class="t5-nome">&nbsp;</span><span class="t5-trilho"><span class="t5-barra"></span></span><span class="t5-pct">0%</span></li>
+        <li><span class="t5-nome">&nbsp;</span><span class="t5-trilho"><span class="t5-barra"></span></span><span class="t5-pct">0%</span></li>
+        <li><span class="t5-nome">&nbsp;</span><span class="t5-trilho"><span class="t5-barra"></span></span><span class="t5-pct">0%</span></li>
+        <li><span class="t5-nome">&nbsp;</span><span class="t5-trilho"><span class="t5-barra"></span></span><span class="t5-pct">0%</span></li>
+        <li><span class="t5-nome">&nbsp;</span><span class="t5-trilho"><span class="t5-barra"></span></span><span class="t5-pct">0%</span></li>
+      </ol>
+      <div class="vista">
+        <canvas id="miniatura" width="28" height="28" role="img" aria-label="Miniatura de 28 por 28 pontos que a rede enxerga"></canvas>
+        <div>
+          <h4>O que a rede enxerga</h4>
+          <p class="mini">O quadro é recortado, centralizado e reduzido para <strong>28 × 28 pontos</strong>, com traço claro sobre fundo preto, como nos desenhos do Quick, Draw!. Só essa miniatura entra na rede.</p>
+        </div>
+      </div>
+      <details class="detalhe">
+        <summary>Como o rabisco vira 28 × 28</summary>
+        <ol class="mini lista-passos">
+          <li>Os traços são guardados como listas de pontos (e não como foto), por isso o tamanho do traço na tela não importa.</li>
+          <li>Calcula-se a <strong>caixa</strong> que envolve o desenho inteiro.</li>
+          <li>O desenho é <strong>ampliado ou reduzido</strong> até o lado maior medir 26 pontos, sem deformar.</li>
+          <li>A caixa é <strong>centralizada</strong> na grade de 28 × 28.</li>
+          <li>Cada segmento é pintado com espessura fixa (1,7 ponto) e suavização. Valores de 0 (preto) a 255 (branco); a rede divide por 255.</li>
+        </ol>
+      </details>
+    </div>
+  </div>
+
+  <div class="cartao">
+    <h3>As 18 categorias</h3>
+    <ul id="chips" class="chips" aria-label="Categorias reconhecidas"></ul>
+    <p class="mini aviso-honesto"><strong>Aviso honesto:</strong> a rede aprendeu com desenhos de um jogo, feitos em segundos e já reduzidos a 28 × 28. Rabiscos feitos no mouse ou no dedo podem ser um pouco diferentes, e o palpite pode errar mais do que nos números do trabalho. Desenhos grandes, completos e centralizados funcionam melhor.</p>
+  </div>
+</section>
+
+<!-- ============================ COMO FUNCIONA ============================ -->
+<section id="como-funciona" class="sec" aria-labelledby="como-t">
+  <h2 id="como-t">Como funciona: o desenho passeando pela rede</h2>
+  <p class="lead">Uma CNN funciona como uma linha de montagem: cada camada olha o resultado da anterior e destaca algo um pouco mais complexo. A visualização usa a rede real, com os pesos reais.</p>
+
+  <div class="cartao fonte">
+    <h3>Qual desenho usar?</h3>
+    <div class="fonte-linha">
+      <label class="radio"><input type="radio" name="fonte" value="meu"> Desenho do jogo</label>
+      <label class="radio"><input type="radio" name="fonte" value="exemplo" checked> Exemplo do conjunto de dados</label>
+      <label for="sel-cat" class="so-leitor">Categoria do exemplo</label>
+      <select id="sel-cat" class="campo"></select>
+      <button type="button" id="btn-outro" class="botao pequeno sec2">Outro exemplo</button>
+    </div>
+    <p id="fonte-aviso" class="mini" aria-live="polite"></p>
+  </div>
+
+  <div class="cartao">
+    <h3>Passo zero: preparar o desenho</h3>
+    <div class="prep">
+      <figure><canvas id="prep-quadro" width="240" height="240" role="img" aria-label="Traços originais com a caixa que os envolve"></canvas><figcaption><strong>1. Traços</strong> e a caixa que os envolve</figcaption></figure>
+      <span class="seta" aria-hidden="true">→</span>
+      <figure><canvas id="prep-centro" width="240" height="240" role="img" aria-label="Desenho ampliado e centralizado numa grade de 28 por 28"></canvas><figcaption><strong>2. Recortar e centralizar</strong> na grade 28 × 28</figcaption></figure>
+      <span class="seta" aria-hidden="true">→</span>
+      <figure><canvas id="prep-pixels" width="28" height="28" role="img" aria-label="Imagem de 28 por 28 pontos"></canvas><figcaption><strong>3. Pontos</strong>: 784 números de 0 a 255</figcaption></figure>
+    </div>
+    <p class="mini" id="prep-leitura" aria-live="polite">Passe o mouse (ou toque) sobre a imagem 28 × 28 para ler o valor de cada ponto.</p>
+  </div>
+
+  <div class="cartao">
+    <div class="cab-linha">
+      <h3>Passo a passo pela rede</h3>
+      <div class="botoes">
+        <button type="button" id="pp-ant" class="botao pequeno sec2">Anterior</button>
+        <button type="button" id="pp-prox" class="botao pequeno">Próximo</button>
+        <button type="button" id="pp-tocar" class="botao pequeno sec2" aria-pressed="false">Tocar tudo</button>
+      </div>
+    </div>
+    <ol id="pipeline" class="pipeline" aria-label="Etapas da rede">
+      <li class="etapa" data-e="0"><h4><span class="et-n">1</span> Entrada</h4><p class="mini">784 números: um por ponto da imagem.</p><div class="et-corpo"><canvas id="et-entrada" width="28" height="28" role="img" aria-label="Imagem de entrada"></canvas></div></li>
+      <li class="etapa" data-e="1"><h4><span class="et-n">2</span> Camada 1</h4><p class="mini">16 filtros procuram <strong>traços simples</strong>: linhas e bordas em várias direções.</p><div class="et-corpo mapas" id="et-c1" role="group" aria-label="16 mapas da camada 1"></div></li>
+      <li class="etapa" data-e="2"><h4><span class="et-n">3</span> Camada 2</h4><p class="mini">32 filtros combinam traços em <strong>formas</strong>: cantos e curvas.</p><div class="et-corpo mapas" id="et-c2" role="group" aria-label="32 mapas da camada 2"></div></li>
+      <li class="etapa" data-e="3"><h4><span class="et-n">4</span> Camada 3</h4><p class="mini">64 filtros combinam formas em <strong>partes</strong> maiores do desenho. A imagem já é bem pequena (3 × 3).</p><div class="et-corpo mapas" id="et-c3" role="group" aria-label="64 mapas da camada 3"></div></li>
+      <li class="etapa" data-e="4"><h4><span class="et-n">5</span> Palpite</h4><p class="mini">Duas camadas somam as pistas e dão uma <strong>nota</strong> a cada categoria. As notas viram porcentagens.</p><div class="et-corpo"><ol id="et-saida" class="saida" aria-label="Probabilidade de cada categoria"></ol></div></li>
+    </ol>
+    <p class="mini">Cada mapa mostra onde um filtro “acendeu” (mais escuro = mais forte). Cada mapa tem a escala própria. A descrição do que cada camada procura é a intuição usual sobre CNNs; os filtros reais misturam um pouco de tudo.</p>
+  </div>
+
+  <div class="grade2">
+    <div class="cartao">
+      <h3>Uma lupa que passeia pelo desenho</h3>
+      <p class="mini">Um filtro da camada 1 é uma lupa de 3 × 3 pontos. Ela passeia pela imagem multiplicando cada ponto por um peso e somando. O resultado vira um ponto no mapa ao lado.</p>
+      <div class="lupa">
+        <div class="lupa-col"><canvas id="lupa-entrada" width="196" height="196" role="img" aria-label="Imagem de entrada com a lupa 3 por 3"></canvas><span class="mini">Entrada</span></div>
+        <div class="lupa-col"><canvas id="lupa-saida" width="196" height="196" role="img" aria-label="Mapa construído pela lupa"></canvas><span class="mini">Mapa do filtro</span></div>
+      </div>
+      <div class="lupa-nucleo"><div id="lupa-pesos" class="pesos" aria-label="Pesos do filtro 3 por 3"></div><p id="lupa-conta" class="mini" aria-live="off"></p></div>
+      <div class="botoes">
+        <label for="lupa-filtro" class="mini">Filtro</label>
+        <select id="lupa-filtro" class="campo"></select>
+        <button type="button" id="lupa-tocar" class="botao pequeno" aria-pressed="false">Tocar</button>
+        <button type="button" id="lupa-reiniciar" class="botao pequeno sec2">Reiniciar</button>
+      </div>
+    </div>
+
+    <div class="cartao">
+      <h3>Onde a rede olhou? (mapa de calor)</h3>
+      <p class="mini">Para descobrir, pequenos quadrados do desenho são <strong>apagados um de cada vez</strong>. Se o palpite desaba, aquele pedaço importava. Quanto mais vermelho, mais importante.</p>
+      <div class="calor">
+        <div class="calor-img">
+          <canvas id="calor-base" width="28" height="28" role="img" aria-label="Desenho"></canvas>
+          <canvas id="calor-mapa" width="28" height="28" aria-hidden="true"></canvas>
+        </div>
+        <div class="calor-ctl">
+          <label for="calor-classe" class="mini">Explicar a categoria</label>
+          <select id="calor-classe" class="campo"></select>
+          <label for="calor-opac" class="mini">Intensidade do vermelho</label>
+          <input type="range" id="calor-opac" min="0" max="100" value="80">
+          <p id="calor-leitura" class="mini" aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ ERROS ============================ -->
+<section id="erros" class="sec" aria-labelledby="erros-t">
+  <h2 id="erros-t">Erros: o que a rede confunde</h2>
+  <p class="lead">A matriz de confusão compara a categoria <strong>real</strong> (linhas) com o <strong>palpite</strong> (colunas), em 36.000 desenhos de teste que a rede nunca viu. A diagonal são os acertos. Fora dela, cada quadrado vermelho é uma troca. Clique (ou use as listas) para ver exemplos.</p>
+  <div class="grade-erros">
+    <div class="cartao">
+      <div class="botoes">
+        <label class="radio"><input type="radio" name="mat-modo" value="n" checked> Contagem</label>
+        <label class="radio"><input type="radio" name="mat-modo" value="p"> Porcentagem da linha</label>
+      </div>
+      <div id="matriz" class="matriz" role="group" aria-label="Matriz de confusão, categoria real nas linhas e palpite nas colunas"></div>
+      <p class="mini">Cores: verde = acertos; vermelho = trocas (mais escuro, mais trocas). Para escolher uma célula com precisão, use os seletores ao lado.</p>
+    </div>
+    <div class="cartao detalhe-erro">
+      <h3>Detalhe</h3>
+      <div class="botoes">
+        <label for="err-real" class="mini">Real</label><select id="err-real" class="campo"></select>
+        <label for="err-prev" class="mini">Palpite</label><select id="err-prev" class="campo"></select>
+      </div>
+      <p id="err-texto" class="err-texto" aria-live="polite"></p>
+      <div id="err-exemplos" class="exemplos"></div>
+      <h4>Pares mais confundidos</h4>
+      <ol id="err-pares" class="pares"></ol>
+      <p class="mini">Em geral, a confusão tem razão de ser: gato e cachorro são quadrúpedes com orelhas, e um pássaro de lado lembra um avião.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ DADOS ============================ -->
+<section id="dados" class="sec" aria-labelledby="dados-t">
+  <h2 id="dados-t">Dados: de onde vêm os rabiscos</h2>
+  <p class="lead">Os desenhos vêm do <strong>Quick, Draw!</strong>, um jogo do Google em que milhões de pessoas desenharam objetos em 20 segundos. O conjunto usado aqui tem 18 categorias, com 8.000 desenhos de treino, 2.000 de validação e 2.000 de teste por categoria.</p>
+  <div class="cartao">
+    <div class="cab-linha"><h3>Galeria (8 exemplos por categoria)</h3><button type="button" id="gal-embaralhar" class="botao pequeno sec2">Embaralhar</button></div>
+    <div id="galeria" class="galeria"></div>
+  </div>
+  <div class="cartao">
+    <h3>Lupa de pixels</h3>
+    <p class="mini">Clique em qualquer exemplo da galeria para ampliar. Cada quadradinho é um dos 784 números que a rede recebe.</p>
+    <div class="zoom"><canvas id="zoom-canvas" width="280" height="280" role="img" aria-label="Exemplo ampliado"></canvas><p id="zoom-leitura" class="mini" aria-live="polite">Nenhum exemplo escolhido.</p></div>
+  </div>
+</section>
+
+<!-- ============================ RESULTADOS ============================ -->
+<section id="resultados" class="sec" aria-labelledby="res-t">
+  <h2 id="res-t">Resultados: os números do trabalho</h2>
+  <p class="lead">Todos os valores abaixo vêm das execuções do trabalho, medidos em 36.000 desenhos de teste. Os traços de barra de erro são intervalos de confiança de 95%.</p>
+
+  <div class="cartao">
+    <div class="cab-linha"><h3>1. A rede que olha a imagem ganha?</h3>
+      <div class="botoes"><label class="radio"><input type="radio" name="cmp-metrica" value="acc_media" checked> Acerto no 1º palpite</label><label class="radio"><input type="radio" name="cmp-metrica" value="top3_media"> Certa entre os 3 palpites</label></div></div>
+    <div id="g-comparacao" class="grafico"></div>
+    <p class="mini" id="cmp-texto"></p>
+  </div>
+
+  <div class="cartao">
+    <h3>2. Quantos desenhos de treino são necessários?</h3>
+    <div class="botoes" id="curva-modelos"></div>
+    <div id="g-curva" class="grafico"></div>
+    <div class="botoes"><label for="curva-n" class="mini">Desenhos por categoria</label><input type="range" id="curva-n" min="0" max="4" value="1" step="1"><output id="curva-saida" class="mini" for="curva-n"></output></div>
+  </div>
+
+  <div class="cartao">
+    <h3>3. E se o desenho sair fora do padrão?</h3>
+    <p class="mini">Cada mudança foi aplicada a 10.000 desenhos de teste (por isso o valor "sem mudança" difere um pouco do teste completo de 36.000).</p>
+    <div class="botoes">
+      <label for="rob-tipo" class="mini">Mudança</label><select id="rob-tipo" class="campo"></select>
+      <label for="rob-valor" class="mini">Intensidade</label><input type="range" id="rob-valor" min="0" max="5" step="1" value="2"><output id="rob-saida" class="mini" for="rob-valor"></output>
+    </div>
+    <div class="grade2 rob">
+      <div><div id="g-robustez" class="grafico"></div><p class="mini" id="rob-texto"></p></div>
+      <div class="rob-ao-vivo">
+        <h4>Teste ao vivo (rede final)</h4>
+        <div class="rob-imgs">
+          <figure><canvas id="rob-orig" width="28" height="28" role="img" aria-label="Desenho original"></canvas><figcaption class="mini">Original</figcaption></figure>
+          <span class="seta" aria-hidden="true">→</span>
+          <figure><canvas id="rob-transf" width="28" height="28" role="img" aria-label="Desenho transformado"></canvas><figcaption class="mini">Transformado</figcaption></figure>
+        </div>
+        <p id="rob-ao-vivo-txt" class="mini" aria-live="polite"></p>
+        <p class="mini">Usa o desenho do jogo, se houver, ou um exemplo da galeria.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grade2">
+    <div class="cartao">
+      <h3>4. A confiança da rede é honesta?</h3>
+      <div class="botoes"><label class="radio"><input type="checkbox" id="cal-temp"> Ajustar com “temperatura” (T = 1,28)</label></div>
+      <div id="g-calibracao" class="grafico"></div>
+      <p class="mini" id="cal-texto"></p>
+    </div>
+    <div class="cartao">
+      <h3>5. Quais categorias são mais fáceis?</h3>
+      <div id="g-classes" class="grafico"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ SOBRE ============================ -->
+<section id="sobre" class="sec" aria-labelledby="sobre-t">
+  <h2 id="sobre-t">Sobre</h2>
+  <div class="grade2">
+    <div class="cartao">
+      <h3>O trabalho</h3>
+      <p>Laboratório do <strong>Trabalho 02 de Deep Learning</strong> (PPGCA/Unisinos, 2026/2), disciplina do Prof. Dr. Felipe André Zeiser. Autor: Epitácio Vicente do Nascimento Neto (trabalho individual).</p>
+      <p>Pergunta central: uma CNN pequena reconhece rabiscos melhor do que redes mais simples, e o que acontece quando o desenho foge do padrão?</p>
+      <h4>A rede</h4>
+      <p>Três blocos de convolução 3 × 3 (16, 32 e 64 filtros), cada um seguido de ReLU e de pooling 2 × 2, e duas camadas densas (96 e 18 neurônios): <strong>80.434 parâmetros</strong>. A versão exibida foi treinada com <strong>aumento de dados</strong> (deslocar, girar e mudar a escala dos desenhos durante o treino) e acerta 89,8% no teste.</p>
+      <h4>Como rodar localmente</h4>
+      <pre><code>cd lab
+python3 -m http.server 8000
+# abrir http://localhost:8000
+node --test tests/    # testes (Node 18 ou mais novo)</code></pre>
+    </div>
+    <div class="cartao">
+      <h3>Limites</h3>
+      <ul class="lista">
+        <li>Imagens de <strong>28 × 28</strong> pontos, simplificadas, de um jogo. Rabiscos no mouse ou no dedo diferem do que a rede viu no treino.</li>
+        <li>Só 18 categorias: qualquer outro desenho recebe, obrigatoriamente, um palpite entre elas.</li>
+        <li>Traço muito grosso derruba a rede (ver Resultados, item 3), porque o treino não incluía variação de espessura.</li>
+        <li>O intervalo de confiança só reflete o tamanho do conjunto de teste; a versão com aumento de dados teve 2 sementes de treino.</li>
+      </ul>
+      <h3>Créditos e licenças</h3>
+      <ul class="lista">
+        <li>Desenhos: <a href="https://github.com/googlecreativelab/quickdraw-dataset">Quick, Draw!</a>, Google Creative Lab, licença <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Dados reduzidos (subconjunto de 18 categorias, bitmaps 28 × 28).</li>
+        <li>Referência: Ha, D.; Eck, D. <em>A Neural Representation of Sketches</em>. arXiv:1704.03477, 2017.</li>
+        <li>Código do laboratório: licença MIT. Sem bibliotecas externas.</li>
+        <li>Repositório: <a href="https://github.com/epineto/quickdraw-dl-unisinos">epineto/quickdraw-dl-unisinos</a>.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="rodape">
+  <p>Adivinha o Desenho · Trabalho 02 de Deep Learning · PPGCA/Unisinos · Epitácio Vicente do Nascimento Neto</p>
+  <p>Desenhos: Quick, Draw! (Google Creative Lab, CC BY 4.0) · Código: MIT · Nada do que se desenha sai do navegador.</p>
+</footer>
+
+<script type="module" src="src/ui/app.js"></script>
+</body>
+</html>

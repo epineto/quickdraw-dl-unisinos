@@ -1,0 +1,13 @@
+{
+  "name": "quickdraw-dl-unisinos",
+  "version": "1.0.0",
+  "description": "Adivinha o Desenho: uma CNN pequena que reconhece rabiscos do Quick, Draw!, rodando inteira no navegador",
+  "type": "module",
+  "license": "MIT",
+  "author": "Epitácio Vicente do Nascimento Neto",
+  "repository": { "type": "git", "url": "git+https://github.com/epineto/quickdraw-dl-unisinos.git" },
+  "homepage": "https://epineto.github.io/quickdraw-dl-unisinos/",
+  "private": true,
+  "scripts": { "test": "node --test tests/", "serve": "python3 -m http.server 8000" },
+  "engines": { "node": ">=18" }
+}
