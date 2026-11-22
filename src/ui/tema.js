@@ -1,9 +1,9 @@
-// Tema claro/escuro opcional: segue o sistema por padrão; o botão alterna e a escolha fica salva (com try/catch).
+// Tema claro por padrão (não segue o sistema); o botão alterna e a escolha fica salva (com try/catch).
 const CHAVE = 'quickdraw-tema';
 const ouvintes = [];
 export const onTema = (fn) => ouvintes.push(fn);
 
-const sistemaEscuro = () => window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
+const sistemaEscuro = () => false; // padrão: claro
 export const temaAtual = () => document.documentElement.dataset.theme || (sistemaEscuro() ? 'dark' : 'light');
 
 function aplicar(tema, salvar) {
