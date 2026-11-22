@@ -7,6 +7,7 @@ import { iniciarComoFunciona } from './comofunciona.js';
 import { iniciarErros } from './erros.js';
 import { iniciarDados } from './dados.js';
 import { iniciarResultados } from './resultados.js';
+import { iniciarTema } from './tema.js';
 
 /** Os CSV convertidos em JSON trazem números como texto; converte recursivamente o que parece número. */
 function numerizar(x) {
@@ -36,6 +37,7 @@ function navegacao() {
 }
 
 async function main() {
+  iniciarTema();
   try {
     const [modelo, matriz, curvas, galeria, resumo] = await Promise.all([
       json('data/cnn_quickdraw.json'), json('data/matriz_confusao.json'), json('data/curvas.json'), json('data/galeria.json'), json('data/resumo.json')]);

@@ -27,7 +27,7 @@ export function iniciarErros() {
       const n = mat[i][j], taxa = n / linhaTot[i], b = cels[i][j], sp = b.firstChild;
       let a;
       if (i === j) { a = 0.3 + 0.7 * taxa; b.style.background = `rgba(46,125,91,${a})`; }
-      else if (n === 0) { a = 0; b.style.background = '#F1F3F8'; }
+      else if (n === 0) { a = 0; b.style.background = 'var(--zero)'; }
       else { a = 0.1 + 0.9 * Math.sqrt(n / maxOff); b.style.background = `rgba(192,57,43,${a})`; }
       b.classList.toggle('fraca', a < 0.55);
       const mostra = i === j || (S.modo === 'n' ? n >= 15 : taxa >= 0.02);

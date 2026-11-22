@@ -4,7 +4,7 @@ import { prever, topK } from '../core/cnn.js';
 import { afim, engrossar, decodificar4bits, pintar } from '../core/imagem.js';
 
 const NS = 'http://www.w3.org/2000/svg';
-const COR = { baseline: '#8A8FA8', mlp: '#4A5AB8', cnn: '#1D2369', cnn_aug: '#C0392B' };
+const COR = { baseline: 'var(--c-base)', mlp: '#4A5AB8', cnn: 'var(--c-cnn)', cnn_aug: '#C0392B' };
 const NOME = { baseline: 'Linha de base (regressão logística)', mlp: 'MLP (rede comum)', cnn: 'CNN', cnn_aug: 'CNN com aumento de dados (final)' };
 const CURTO = { baseline: 'Linha de base', mlp: 'MLP', cnn: 'CNN', cnn_aug: 'CNN + aumento' };
 
@@ -15,7 +15,9 @@ function svg(w, h, filhos) {
 }
 function t(tag, attrs = {}, texto) {
   const e = document.createElementNS(NS, tag);
-  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  const vars = [];
+  for (const [k, v] of Object.entries(attrs)) { if ((k === 'fill' || k === 'stroke') && String(v).startsWith('var(')) vars.push([k, v]); else e.setAttribute(k, v); }
+  vars.forEach(([k, v]) => e.style.setProperty(k, v)); // depois do atributo style, que o sobrescreveria
   if (texto != null) e.textContent = texto;
   return e;
 }
@@ -47,10 +49,10 @@ function barras(itens, { w = 460, h = 300, min = 0 } = {}) {
     g.push(r);
     if (it.ic) {
       const ya = y1 - ((it.ic[0] - min) / (1 - min)) * (y1 - y0), yb = y1 - ((it.ic[1] - min) / (1 - min)) * (y1 - y0);
-      g.push(t('line', { x1: cx, x2: cx, y1: ya, y2: yb, stroke: '#111', 'stroke-width': 2 }), t('line', { x1: cx - 6, x2: cx + 6, y1: ya, y2: ya, stroke: '#111', 'stroke-width': 2 }), t('line', { x1: cx - 6, x2: cx + 6, y1: yb, y2: yb, stroke: '#111', 'stroke-width': 2 }));
+      g.push(t('line', { x1: cx, x2: cx, y1: ya, y2: yb, stroke: 'var(--barra-erro)', 'stroke-width': 2 }), t('line', { x1: cx - 6, x2: cx + 6, y1: ya, y2: ya, stroke: 'var(--barra-erro)', 'stroke-width': 2 }), t('line', { x1: cx - 6, x2: cx + 6, y1: yb, y2: yb, stroke: 'var(--barra-erro)', 'stroke-width': 2 }));
     }
     g.push(t('text', { x: cx, y: y - (it.ic ? 12 : 6), 'text-anchor': 'middle', class: 'valor' }, pct(it.valor)));
-    g.push(t('text', { x: cx, y: y1 + 16, 'text-anchor': 'middle', class: 'rotulo', style: 'font-weight:700;fill:#1D2369' }, it.rotulo));
+    g.push(t('text', { x: cx, y: y1 + 16, 'text-anchor': 'middle', class: 'rotulo', style: 'font-weight:700;fill:var(--rotulo-forte)' }, it.rotulo));
     if (it.sub) g.push(t('text', { x: cx, y: y1 + 30, 'text-anchor': 'middle', class: 'rotulo' }, it.sub));
   });
   g.push(t('line', { x1: x0, x2: x1, y1: y1, y2: y1, class: 'eixo' }));
@@ -177,7 +179,7 @@ export function iniciarResultados() {
   const max = cls[0].acuracia, min = cls[cls.length - 1].acuracia;
   cls.forEach((c, i) => {
     const y = 6 + i * rh, bw = (c.acuracia) * (w - 190), cor = c.acuracia === max ? '#2E7D5B' : c.acuracia === min ? '#C0392B' : '#4A5AB8';
-    g.push(t('text', { x: 118, y: y + 14, 'text-anchor': 'end', class: 'rotulo', style: 'fill:#1B1F3B' }, c.categoria), t('rect', { x: 124, y: y + 2, width: bw, height: rh - 7, rx: 3, fill: cor }), t('text', { x: 124 + bw + 6, y: y + 14, class: 'valor' }, pct(c.acuracia)));
+    g.push(t('text', { x: 118, y: y + 14, 'text-anchor': 'end', class: 'rotulo', style: 'fill:var(--texto)' }, c.categoria), t('rect', { x: 124, y: y + 2, width: bw, height: rh - 7, rx: 3, fill: cor }), t('text', { x: 124 + bw + 6, y: y + 14, class: 'valor' }, pct(c.acuracia)));
   });
   $('#g-classes').replaceChildren(svg(w, h, g));
   $('#g-classes').append(el('p', { class: 'mini', text: `Mais fáceis: ${cls[0].categoria} e ${cls[1].categoria}. Mais difícil: ${cls[cls.length - 1].categoria}, que se parece com cachorro e avião dependendo do ângulo.` }));
