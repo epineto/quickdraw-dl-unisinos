@@ -1,10 +1,11 @@
 // Seção #dados: galeria por categoria e lupa de pixels.
 import { $, $$, app, el } from './util.js';
 import { decodificar4bits, pintar } from '../core/imagem.js';
+import { t, onLang, catNome } from './i18n.js';
 
 export function iniciarDados() {
   const cats = app.dados.galeria.categorias, raiz = $('#galeria');
-  let sel = null;
+  let sel = null, zoomCat = -1, hover = null; // categoria do exemplo ampliado e ponto sob o mouse (para reescrever o texto ao trocar de idioma)
   const imgs = cats.map((c) => c.imagens.map((b) => decodificar4bits(b)));
 
   function embaralhar(a) { const b = a.map((_, i) => i); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; }
@@ -15,11 +16,11 @@ export function iniciarDados() {
       (ordem ? ordem[ci] : imgs[ci].map((_, i) => i)).forEach((k) => {
         const cv = el('canvas', { width: 28, height: 28, 'aria-hidden': 'true' });
         pintar(cv, imgs[ci][k]);
-        const b = el('button', { type: 'button', 'aria-label': `Ampliar exemplo ${k + 1} de ${c.nome}` }, cv);
+        const b = el('button', { type: 'button', 'data-k': k, 'aria-label': t('dados.aria.ampliar', { k: k + 1, nome: catNome(c.nome) }) }, cv);
         b.addEventListener('click', () => escolher(ci, k, b));
         caixa.append(b);
       });
-      return el('div', { class: 'gal-cat' }, el('h4', { text: c.nome }), caixa);
+      return el('div', { class: 'gal-cat' }, el('h4', { text: catNome(c.nome) }), caixa);
     }));
   }
   $('#gal-embaralhar').addEventListener('click', () => { sel = null; montar(imgs.map((l) => embaralhar(l))); });
@@ -36,16 +37,29 @@ export function iniciarDados() {
   }
   function escolher(ci, k, botao) {
     $$('.gal-imgs button.sel').forEach((b) => b.classList.remove('sel'));
-    botao.classList.add('sel'); sel = botao; atual = imgs[ci][k];
+    botao.classList.add('sel'); sel = botao; atual = imgs[ci][k]; zoomCat = ci; hover = null;
     desenharZoom();
-    $('#zoom-leitura').textContent = `${cats[ci].nome}: passe o mouse (ou toque) sobre o quadro para ler o valor de cada ponto.`;
+    leituraZoom();
+  }
+  function leituraZoom() {
+    const el_ = $('#zoom-leitura');
+    if (!atual) el_.textContent = t('dados.leitura_vazia');
+    else if (!hover) el_.textContent = t('dados.leitura_cat', { nome: catNome(cats[zoomCat].nome) });
+    else el_.textContent = t('como.leitura', { l: hover[1] + 1, c: hover[0] + 1, v: atual[hover[1] * 28 + hover[0]] });
   }
   zc.addEventListener('pointermove', (e) => {
     if (!atual) return;
     const r = zc.getBoundingClientRect(), x = Math.min(27, Math.max(0, Math.floor(((e.clientX - r.left) / r.width) * 28))), y = Math.min(27, Math.max(0, Math.floor(((e.clientY - r.top) / r.height) * 28)));
     desenharZoom(); zctx.strokeStyle = '#FFD54A'; zctx.lineWidth = 2; zctx.strokeRect(x * C, y * C, C, C);
-    $('#zoom-leitura').textContent = `Linha ${y + 1}, coluna ${x + 1}: valor ${atual[y * 28 + x]} (0 = preto, 255 = branco).`;
+    hover = [x, y]; leituraZoom();
   });
   void sel;
-  montar(null); desenharZoom();
+  montar(null); desenharZoom(); leituraZoom();
+  onLang(() => {
+    $$('.gal-cat').forEach((g, ci) => {
+      g.querySelector('h4').textContent = catNome(cats[ci].nome);
+      $$('button', g).forEach((b) => b.setAttribute('aria-label', t('dados.aria.ampliar', { k: Number(b.dataset.k) + 1, nome: catNome(cats[ci].nome) })));
+    });
+    leituraZoom();
+  });
 }

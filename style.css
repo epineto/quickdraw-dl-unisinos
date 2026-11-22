@@ -290,3 +290,15 @@ input[type="range"] { accent-color: var(--azul); width: min(260px, 100%); min-he
 
 :root[data-theme="dark"] .hero-logo { background: #fff; border-radius: 8px; padding: 4px 8px; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .hero-logo { background: #fff; border-radius: 8px; padding: 4px 8px; } }
+
+/* seletor de idioma PT | EN no cabeçalho (mesmo visual do laboratório de RL; o cabeçalho é azul-marinho nos dois temas) */
+.idioma { display: flex; border: 1px solid rgba(255,255,255,.6); border-radius: 6px; overflow: hidden; flex: none; }
+.idioma button { background: transparent; color: #fff; border: 0; padding: .35rem .7rem; font: 700 .85rem Arial, sans-serif; cursor: pointer; }
+.idioma button:hover { background: rgba(255,255,255,.14); }
+.idioma button[aria-pressed="true"] { background: #fff; color: var(--marca); }
+@media (max-width: 560px) {
+  .cab-in { gap: .5rem; padding: .5rem .6rem; }
+  .cab-t { font-size: 1rem; }
+  .idioma button { padding: .35rem .5rem; }
+  .logo { height: 28px; }
+}

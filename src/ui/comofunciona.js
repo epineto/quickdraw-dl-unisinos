@@ -4,12 +4,14 @@ import { prever, topK } from '../core/cnn.js';
 import { decodificar4bits, pintar } from '../core/imagem.js';
 import { caixa, normalizar } from '../core/rasterizar.js';
 import { mapaOclusao } from '../core/oclusao.js';
+import { t, onLang, catNome } from './i18n.js';
 
 export function iniciarComoFunciona() {
-  const nomes = app.modelo.nomes, galeria = app.dados.galeria.categorias;
-  const S = { fonte: 'exemplo', cat: Math.max(0, app.modelo.classes.indexOf('house')), ex: 0, r: null, px: null, passo: 4, tocando: 0, lupaPos: 783, lupaTocando: 0, ocl: 0 };
+  const nomes = app.modelo.nomes, galeria = app.dados.galeria.categorias; // nomes em português (ids internos); a exibição passa por N()
+  const N = (i) => catNome(nomes[i]);
+  const S = { hover: null, calcOk: false, ordem: [], fonte: 'exemplo', cat: Math.max(0, app.modelo.classes.indexOf('house')), ex: 0, r: null, px: null, passo: 4, tocando: 0, lupaPos: 783, lupaTocando: 0, ocl: 0 };
   const selCat = $('#sel-cat');
-  selCat.append(...nomes.map((n, i) => el('option', { value: i, text: n })));
+  selCat.append(...nomes.map((n, i) => el('option', { value: i, text: N(i) })));
   selCat.value = S.cat;
   const radioMeu = $('input[name="fonte"][value="meu"]'), radioEx = $('input[name="fonte"][value="exemplo"]');
   radioMeu.disabled = true;
@@ -18,9 +20,7 @@ export function iniciarComoFunciona() {
   const exemplo = () => decodificar4bits(galeria[S.cat].imagens[S.ex % galeria[S.cat].imagens.length]);
   function pixelsAtuais() { return S.fonte === 'meu' && app.pixels ? app.pixels : exemplo(); }
   function aviso() {
-    $('#fonte-aviso').textContent = S.fonte === 'meu'
-      ? 'Usando o desenho feito no Jogo. Desenhe de novo lá para atualizar esta seção.'
-      : app.pixels ? 'Usando um exemplo do conjunto de dados (já vem recortado e centralizado). Escolha "Desenho do jogo" para ver o seu rabisco.' : 'Usando um exemplo do conjunto de dados (já vem recortado e centralizado). Desenhe no Jogo para usar o seu rabisco aqui.';
+    $('#fonte-aviso').textContent = t(S.fonte === 'meu' ? 'como.aviso.meu' : app.pixels ? 'como.aviso.ex_com' : 'como.aviso.ex_sem');
     selCat.disabled = S.fonte === 'meu'; $('#btn-outro').disabled = S.fonte === 'meu';
   }
   $$('input[name="fonte"]').forEach((r) => r.addEventListener('change', () => { S.fonte = r.value; aviso(); tudo(); }));
@@ -68,8 +68,12 @@ export function iniciarComoFunciona() {
   }
   prepP.addEventListener('pointermove', (e) => {
     const r = prepP.getBoundingClientRect(), x = Math.min(27, Math.max(0, Math.floor(((e.clientX - r.left) / r.width) * 28))), y = Math.min(27, Math.max(0, Math.floor(((e.clientY - r.top) / r.height) * 28)));
-    $('#prep-leitura').textContent = `Linha ${y + 1}, coluna ${x + 1}: valor ${S.px[y * 28 + x]} (0 = preto, 255 = branco).`;
+    S.hover = [x, y]; leituraPrep();
   });
+  function leituraPrep() {
+    const h = S.hover;
+    $('#prep-leitura').textContent = h ? t('como.leitura', { l: h[1] + 1, c: h[0] + 1, v: S.px[h[1] * 28 + h[0]] }) : t('como.leitura_vazia');
+  }
 
   /* ---------- pipeline ---------- */
   const etapas = $$('.etapa');
@@ -88,9 +92,10 @@ export function iniciarComoFunciona() {
     $$('li', saida).forEach((li, k) => {
       const [p, i] = ordem[k];
       li.classList.toggle('topo', k === 0);
-      li.children[0].textContent = nomes[i]; li.children[2].textContent = pct(p, 0);
+      li.children[0].textContent = N(i); li.children[2].textContent = pct(p, 0);
       li.dataset.p = p.toFixed(4);
     });
+    S.ordem = ordem.map((o) => o[1]);
     estagio();
   }
   function estagio() {
@@ -105,16 +110,18 @@ export function iniciarComoFunciona() {
   }
   $('#pp-ant').addEventListener('click', () => { pararToque(); S.passo = Math.max(0, S.passo - 1); estagio(); });
   $('#pp-prox').addEventListener('click', () => { pararToque(); S.passo = Math.min(4, S.passo + 1); estagio(); });
-  function pararToque() { if (S.tocando) { clearInterval(S.tocando); S.tocando = 0; } $('#pp-tocar').setAttribute('aria-pressed', 'false'); $('#pp-tocar').textContent = 'Tocar tudo'; }
+  function pararToque() { if (S.tocando) { clearInterval(S.tocando); S.tocando = 0; } $('#pp-tocar').setAttribute('aria-pressed', 'false'); rotuloTocar(); }
+  function rotuloTocar() { $('#pp-tocar').textContent = t(S.tocando ? 'como.pausar' : 'como.pp.tocar'); }
   $('#pp-tocar').addEventListener('click', () => {
     if (S.tocando) { pararToque(); return; }
-    S.passo = 0; estagio(); $('#pp-tocar').setAttribute('aria-pressed', 'true'); $('#pp-tocar').textContent = 'Pausar';
+    S.passo = 0; estagio(); $('#pp-tocar').setAttribute('aria-pressed', 'true');
     S.tocando = setInterval(() => { if (S.passo >= 4) { pararToque(); return; } S.passo++; estagio(); }, reduzMovimento() ? 400 : 1600);
+    rotuloTocar();
   });
 
   /* ---------- lupa ---------- */
   const lf = $('#lupa-filtro');
-  lf.append(...Array.from({ length: 16 }, (_, i) => el('option', { value: i, text: `Filtro ${i + 1}` })));
+  lf.append(...Array.from({ length: 16 }, (_, i) => el('option', { value: i, text: t('como.filtro', { n: i + 1 }) })));
   const lin = $('#lupa-entrada'), lout = $('#lupa-saida'), tmpIn = document.createElement('canvas'), tmpOut = document.createElement('canvas');
   function pesosDoFiltro() { const L1 = app.modelo.camadas[0], f = Number(lf.value); return { w: L1.w.subarray(f * 9, f * 9 + 9), b: L1.b[f], f }; }
   function lupa() {
@@ -140,7 +147,7 @@ export function iniciarComoFunciona() {
     let soma = 0;
     for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) { const x = px + i, y = py + j; if (x >= 0 && y >= 0 && x < 28 && y < 28) soma += w[(j + 1) * 3 + i + 1] * S.px[y * 28 + x] / 255; }
     const tot = soma + b;
-    $('#lupa-conta').textContent = `Ponto (linha ${py + 1}, coluna ${px + 1}): soma dos produtos = ${fmtNum(soma, 2)}; mais o viés ${fmtNum(b, 2)} = ${fmtNum(tot, 2)}. Depois da ReLU (que troca negativos por zero): ${fmtNum(Math.max(0, tot), 2)}.`;
+    $('#lupa-conta').textContent = t('como.lupa.conta', { l: py + 1, c: px + 1, soma: fmtNum(soma, 2), vies: fmtNum(b, 2), tot: fmtNum(tot, 2), relu: fmtNum(Math.max(0, tot), 2) });
     const mx = Math.max(...Array.from(w, Math.abs)) || 1;
     $('#lupa-pesos').replaceChildren(...Array.from(w, (v) => {
       const t = Math.abs(v) / mx, cor = v >= 0 ? `rgba(74,90,184,${0.15 + 0.85 * t})` : `rgba(192,57,43,${0.15 + 0.85 * t})`;
@@ -154,25 +161,26 @@ export function iniciarComoFunciona() {
     if (S.lupaPos >= 783) { lupaParar(); return; }
     S.lupaTocando = requestAnimationFrame(lupaPasso);
   }
-  function lupaParar() { if (S.lupaTocando) cancelAnimationFrame(S.lupaTocando); S.lupaTocando = 0; const b = $('#lupa-tocar'); b.setAttribute('aria-pressed', 'false'); b.textContent = 'Tocar'; }
+  function lupaParar() { if (S.lupaTocando) cancelAnimationFrame(S.lupaTocando); S.lupaTocando = 0; $('#lupa-tocar').setAttribute('aria-pressed', 'false'); rotuloLupa(); }
+  function rotuloLupa() { $('#lupa-tocar').textContent = t(S.lupaTocando ? 'como.pausar' : 'como.tocar'); }
   $('#lupa-tocar').addEventListener('click', () => {
     if (S.lupaTocando) { lupaParar(); return; }
     if (S.lupaPos >= 783) S.lupaPos = 0;
-    const b = $('#lupa-tocar'); b.setAttribute('aria-pressed', 'true'); b.textContent = 'Pausar';
-    S.lupaTocando = requestAnimationFrame(lupaPasso);
+    $('#lupa-tocar').setAttribute('aria-pressed', 'true');
+    S.lupaTocando = requestAnimationFrame(lupaPasso); rotuloLupa();
   });
   $('#lupa-reiniciar').addEventListener('click', () => { lupaParar(); S.lupaPos = 0; lupa(); });
 
   /* ---------- mapa de calor ---------- */
   const cs = $('#calor-classe');
-  cs.append(el('option', { value: 'auto', text: 'Palpite da rede' }), ...nomes.map((n, i) => el('option', { value: i, text: n })));
+  cs.append(el('option', { value: 'auto', text: t('como.calor.auto') }), ...nomes.map((n, i) => el('option', { value: i, text: N(i) })));
   const calorBase = $('#calor-base'), calorMapa = $('#calor-mapa');
   $('#calor-opac').addEventListener('input', (e) => { calorMapa.style.opacity = e.target.value / 100; });
   calorMapa.style.opacity = 0.8;
   async function calor() {
     const id = ++S.ocl, classe = cs.value === 'auto' ? topK(S.r.probs, 1)[0].classe : Number(cs.value);
     pintar(calorBase, S.px);
-    $('#calor-leitura').textContent = 'Calculando...';
+    S.calcOk = false; textoCalor();
     calorMapa.getContext('2d').clearRect(0, 0, 28, 28);
     const res = await mapaOclusao(app.modelo, S.px, classe, { cancelado: () => id !== S.ocl });
     if (!res) return;
@@ -180,8 +188,10 @@ export function iniciarComoFunciona() {
     const c = calorMapa.getContext('2d'), im = c.createImageData(28, 28);
     for (let i = 0; i < 784; i++) { const t = res.max > 0 ? res.mapa[i] / res.max : 0; im.data[4 * i] = 255; im.data[4 * i + 1] = 40; im.data[4 * i + 2] = 40; im.data[4 * i + 3] = Math.round(255 * t * t); }
     c.putImageData(im, 0, 0);
-    S.calor = { classe, max: res.max };
-    $('#calor-leitura').textContent = `Categoria explicada: ${nomes[classe]} (${pct(S.r.probs[classe], 0)} de probabilidade). Apagar o pedaço mais vermelho derruba a nota dessa categoria em até ${fmtNum(res.max, 1)} pontos.`;
+    S.calor = { classe, max: res.max, p: S.r.probs[classe] }; S.calcOk = true; textoCalor();
+  }
+  function textoCalor() {
+    $('#calor-leitura').textContent = S.calcOk ? t('como.calor.leitura', { nome: N(S.calor.classe), p: pct(S.calor.p, 0), max: fmtNum(S.calor.max, 1) }) : t('como.calor.calculando');
   }
   cs.addEventListener('change', calor);
 
@@ -191,6 +201,16 @@ export function iniciarComoFunciona() {
     S.px = pixelsAtuais(); S.r = prever(app.modelo, S.px);
     passoZero(); pipeline(); lupa(); recalcular();
   }
+  rotuloTocar(); rotuloLupa(); leituraPrep();
   aviso(); tudo();
+  // troca de idioma: reescreve só os textos (listas, avisos, leituras); o desenho, o passo e a lupa em curso não são reiniciados
+  onLang(() => {
+    $$('option', selCat).forEach((o, i) => { o.textContent = N(i); });
+    $$('option', cs).forEach((o) => { if (o.value === 'auto') o.textContent = t('como.calor.auto'); else o.textContent = N(Number(o.value)); });
+    $$('option', lf).forEach((o, i) => { o.textContent = t('como.filtro', { n: i + 1 }); });
+    aviso(); leituraPrep(); rotuloTocar(); rotuloLupa(); textoCalor();
+    $$('li', saida).forEach((li, k) => { li.children[0].textContent = N(S.ordem[k]); li.children[2].textContent = pct(Number(li.dataset.p), 0); });
+    lupa();
+  });
   window.__como = S;
 }

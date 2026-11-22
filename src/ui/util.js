@@ -1,11 +1,12 @@
 // Utilidades compartilhadas pela interface.
+import { getLang } from './i18n.js';
 export const $ = (s, r = document) => r.querySelector(s);
 export const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
 /** Estado global simples: modelo, dados e o último desenho do jogo. `bus` avisa quem quiser ouvir. */
 export const app = { modelo: null, dados: {}, pixels: null, tracos: null, bus: new EventTarget() };
 
-export const fmtNum = (x, d = 0) => Number(x).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
+export const fmtNum = (x, d = 0) => Number(x).toLocaleString(getLang() === 'en' ? 'en-US' : 'pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
 export const pct = (x, d = 1) => fmtNum(x * 100, d) + '%';
 export const reduzMovimento = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch { return false; } };
 export const esperar = (ms) => new Promise((r) => setTimeout(r, ms));

@@ -4,18 +4,20 @@ import { prever, topK } from '../core/cnn.js';
 import { rasterizar, tamanho } from '../core/rasterizar.js';
 import { pintar } from '../core/imagem.js';
 import { FORMAS } from '../core/formas.js';
+import { t, onLang, catNome } from './i18n.js';
 
 const L = 400, TAM_MIN = 14, RODADAS = 5, SEGUNDOS = 20;
 
 export function iniciarJogo() {
-  const nomes = app.modelo.nomes;
+  const nomes = app.modelo.nomes; // nomes em português (ids internos); a exibição passa por N()
+  const N = (i) => catNome(nomes[i]);
   const cv = $('#quadro'), ctx = cv.getContext('2d');
   let tracos = [], atual = null, rafId = 0, anim = 0;
   // modo desafio
-  const D = { ativo: false, fase: 'espera', rodada: 0, seq: [], alvo: -1, t0: 0, timer: 0, pontos: 0, hist: [], melhor: ler('qd-melhor', 0) };
+  const D = { ativo: false, fase: 'espera', rodada: 0, seq: [], alvo: -1, t0: 0, timer: 0, pontos: 0, hist: [], melhor: ler('qd-melhor', 0), recomecar: false, alvoVisivel: false, rUlt: null, res: null, novoRecorde: false, abertoEm: 0 };
 
-  $('#chips').append(...nomes.map((n, i) => el('li', { class: 'chip', 'data-i': i, text: n })));
-  $('#sel-forma').append(...Object.entries(FORMAS).map(([k, f]) => el('option', { value: k, text: f.nome })));
+  $('#chips').append(...nomes.map((n, i) => el('li', { class: 'chip', 'data-i': i, text: N(i) })));
+  $('#sel-forma').append(...Object.entries(FORMAS).map(([k, f]) => el('option', { value: k, text: catNome(f.nome) })));
 
   /* ---------- desenho ---------- */
   function redesenhar() {
@@ -57,30 +59,37 @@ export function iniciarJogo() {
 
   /* ---------- palpite ---------- */
   const linhas = $$('#top5 li');
-  function zerarBarras() { linhas.forEach((li) => { li.children[0].innerHTML = '&nbsp;'; li.children[2].textContent = '0%'; li.querySelector('.t5-barra').style.transform = 'scaleX(0)'; }); }
+  function zerarBarras() { ultimoTop = null; linhas.forEach((li) => { li.children[0].innerHTML = '&nbsp;'; li.children[2].textContent = '0%'; li.querySelector('.t5-barra').style.transform = 'scaleX(0)'; }); }
+  // O texto da frase de palpite é guardado como função, para ser reescrito ao trocar de idioma (sem mexer no desenho).
+  let frase = () => t('jogo.frase.aguardando'), ultimoTop = null;
+  function escreverFrase() {
+    const r = frase(); $('#palpite-frase').replaceChildren(...(Array.isArray(r) ? r : [r]));
+  }
+  function setFrase(fn) { frase = fn; escreverFrase(); }
   function mostrar(r, top) {
+    ultimoTop = top;
     top.forEach((o, i) => {
       const li = linhas[i];
-      li.children[0].textContent = nomes[o.classe];
+      li.children[0].textContent = N(o.classe);
       li.children[2].textContent = pct(o.p, 0);
       li.querySelector('.t5-barra').style.transform = `scaleX(${o.p.toFixed(4)})`;
     });
-    const t = top[0], f = $('#palpite-frase');
-    f.replaceChildren();
-    if (t.p >= 0.7) f.append('É ', el('strong', { text: nomes[t.classe] }), ` (${pct(t.p, 0)})`);
-    else if (t.p >= 0.4) f.append('Parece ', el('strong', { text: nomes[t.classe] }), ` (${pct(t.p, 0)})`);
-    else f.append('Sem certeza: talvez ', el('strong', { text: nomes[t.classe] }), ` (${pct(t.p, 0)})`);
+    const p = top[0], k = p.p >= 0.7 ? 'jogo.frase.e' : p.p >= 0.4 ? 'jogo.frase.parece' : 'jogo.frase.talvez';
+    setFrase(() => { // a categoria vai em negrito: o marcador {nome} é trocado por um caractere de controle e o texto é dividido ali
+      const [a, b] = t(k, { nome: '\u0001', p: pct(p.p, 0) }).split('\u0001');
+      return [a, el('strong', { text: N(p.classe) }), b];
+    });
   }
 
   function atualizar() {
     if (!tracos.length) {
       app.pixels = null; app.tracos = null;
-      zerarBarras(); $('#palpite-frase').textContent = D.ativo && D.fase !== 'jogando' ? 'Aguardando o início da rodada.' : 'Aguardando um rabisco.';
+      zerarBarras(); setFrase(() => t(D.ativo && D.fase !== 'jogando' ? 'jogo.frase.aguardando_rodada' : 'jogo.frase.aguardando'));
       pintar($('#miniatura'), new Uint8Array(784));
       app.bus.dispatchEvent(new Event('desenho'));
       return;
     }
-    if (tamanho(tracos) < TAM_MIN) { $('#palpite-frase').textContent = 'Desenhe um pouco mais...'; zerarBarras(); return; }
+    if (tamanho(tracos) < TAM_MIN) { setFrase(() => t('jogo.frase.mais')); zerarBarras(); return; }
     const px = rasterizar(tracos), r = prever(app.modelo, px), top = topK(r.probs, 5);
     app.pixels = px; app.tracos = tracos.map((t) => t.slice());
     pintar($('#miniatura'), px);
@@ -125,37 +134,62 @@ export function iniciarJogo() {
   $('#modo-desafio').addEventListener('click', () => modo(true));
 
   function infoBarra() {
-    $('#desafio-rodada').textContent = `Rodada ${Math.min(D.rodada + (D.fase === 'espera' ? 1 : 1), RODADAS)} de ${RODADAS}`;
-    $('#desafio-pontos').textContent = `${fmtNum(D.pontos)} ponto${D.pontos === 1 ? '' : 's'}`;
+    $('#desafio-rodada').textContent = t('jogo.rodada', { n: Math.min(D.rodada + 1, RODADAS), total: RODADAS });
+    $('#desafio-pontos').textContent = t(D.pontos === 1 ? 'jogo.ponto' : 'jogo.pontos', { n: fmtNum(D.pontos) });
   }
-  function telaInicio() {
-    tela.hidden = false; tela.replaceChildren(
-      el('h3', { text: 'Desafio rápido' }),
-      el('p', { text: `${RODADAS} rodadas de ${SEGUNDOS} segundos. A rede pede uma categoria e o desenho precisa convencê-la antes de o tempo acabar. Quanto mais rápido, mais pontos (até ${100 + SEGUNDOS * 5} por rodada).` }),
-      D.melhor ? el('p', { class: 'mini', text: `Melhor pontuação neste navegador: ${fmtNum(D.melhor)}.` }) : '',
-      el('button', { type: 'button', class: 'botao', id: 'ov-comecar', text: 'Começar' }));
-    $('#ov-comecar').addEventListener('click', comecar);
-    $('#btn-comecar').textContent = 'Começar desafio';
+  const rotuloComecar = () => { $('#btn-comecar').textContent = t(D.recomecar ? 'jogo.recomecar' : 'jogo.comecar_desafio'); };
+  function mostrarAlvo() { const a = $('#desafio-alvo'); a.textContent = D.alvoVisivel ? N(D.alvo) : '...'; }
+
+  /* A tela sobre o quadro (início, resultado da rodada, final) é redesenhada a partir do estado em D; assim a troca de idioma
+     não reinicia nada. `foco` só vale na primeira exibição (para não tirar o foco do botão de idioma). */
+  function renderTela(foco) {
+    if (D.fase === 'espera') {
+      tela.hidden = false; tela.replaceChildren(
+        el('h3', { text: t('jogo.tela.t') }),
+        el('p', { text: t('jogo.tela.regras', { rodadas: RODADAS, seg: SEGUNDOS, max: 100 + SEGUNDOS * 5 }) }),
+        D.melhor ? el('p', { class: 'mini', text: t('jogo.melhor', { n: fmtNum(D.melhor) }) }) : '',
+        el('button', { type: 'button', class: 'botao', id: 'ov-comecar', text: t('jogo.comecar') }));
+      $('#ov-comecar').addEventListener('click', comecar);
+    } else if (D.fase === 'resultado') {
+      const R = D.res;
+      tela.hidden = false;
+      tela.replaceChildren(
+        el('h3', { text: t(R.k, { nome: R.c >= 0 ? N(R.c) : '' }) }), el('p', { text: R.pts ? t('jogo.res.mais', { n: R.pts }) : t('jogo.res.zero') }),
+        el('button', { type: 'button', class: 'botao', id: 'ov-prox', text: t(R.ultima ? 'jogo.res.ver_final' : 'jogo.res.proxima') }));
+      const btn = $('#ov-prox');
+      btn.addEventListener('click', (ev) => { if (ev.detail > 0 && performance.now() - D.abertoEm < 700) return; if (D.fase !== 'resultado') return; D.rodada = R.idx + 1; if (R.ultima) telaFinal(); else novaRodada(); });
+      if (foco) btn.focus();
+    } else if (D.fase === 'fim') {
+      const tab = el('table', {}, el('tr', {}, ...['jogo.fim.cat', 'jogo.fim.res', 'jogo.fim.pts'].map((k) => el('th', { text: t(k) }))),
+        ...D.hist.map((h) => el('tr', {}, el('td', { text: N(h.alvo) }), el('td', { text: h.motivo === 'acerto' ? t('jogo.fim.acertou', { n: fmtNum(h.seg, 1) }) : h.motivo === 'pular' ? t('jogo.fim.pulada') : h.pts ? t('jogo.fim.quase') : t('jogo.fim.errou') }), el('td', { text: String(h.pts) }))));
+      tela.replaceChildren(el('h3', { text: t('jogo.fim.total', { n: fmtNum(D.pontos), max: RODADAS * (100 + SEGUNDOS * 5) }) }),
+        el('p', { class: 'mini', text: D.novoRecorde ? t('jogo.fim.novo') : t('jogo.melhor', { n: fmtNum(D.melhor) }) }), tab,
+        el('button', { type: 'button', class: 'botao', id: 'ov-de-novo', text: t('jogo.fim.denovo') }));
+      $('#ov-de-novo').addEventListener('click', comecar);
+      if (foco) $('#ov-de-novo').focus();
+    }
   }
+  function telaInicio() { D.recomecar = false; renderTela(false); rotuloComecar(); }
   function comecar() {
-    D.seq = sorteio(); D.rodada = 0; D.pontos = 0; D.hist = []; $('#btn-comecar').textContent = 'Recomeçar';
+    D.seq = sorteio(); D.rodada = 0; D.pontos = 0; D.hist = []; D.recomecar = true; rotuloComecar();
     novaRodada();
   }
   $('#btn-comecar').addEventListener('click', comecar);
   function novaRodada() {
     clearInterval(D.timer); tracos = []; atual = null; D.fase = 'jogando'; redesenhar(); atualizar();
-    D.alvo = D.seq[D.rodada]; D.t0 = performance.now(); tela.hidden = true; $('#btn-pular').disabled = false; $('#quadro-dica').hidden = false;
-    $('#desafio-alvo').textContent = nomes[D.alvo];
+    D.alvo = D.seq[D.rodada]; D.alvoVisivel = true; D.t0 = performance.now(); tela.hidden = true; $('#btn-pular').disabled = false; $('#quadro-dica').hidden = false;
+    mostrarAlvo();
     $$('.chip').forEach((c) => c.classList.toggle('alvo', Number(c.dataset.i) === D.alvo));
     infoBarra(); tique();
     D.timer = setInterval(tique, 100);
     cv.focus({ preventScroll: true });
   }
   function restante() { return Math.max(0, SEGUNDOS - (performance.now() - D.t0) / 1000); }
+  const textoTempo = () => { $('#desafio-tempo-txt').textContent = t('jogo.seg', { n: fmtNum(D.rUlt, 1) }); };
   function tique() {
     const r = restante(), barra = $('#tempo-barra');
     barra.style.transform = `scaleX(${(r / SEGUNDOS).toFixed(3)})`; barra.style.background = r < 5 ? 'var(--verm)' : 'var(--verde)';
-    $('#desafio-tempo-txt').textContent = `${fmtNum(r, 1)} s`;
+    D.rUlt = r; textoTempo();
     if (r <= 0 && D.fase === 'jogando') encerrarRodada('tempo');
   }
   function verificarRodada(top) {
@@ -165,38 +199,41 @@ export function iniciarJogo() {
     if (D.fase !== 'jogando') return;
     clearInterval(D.timer); D.fase = 'resultado'; $('#btn-pular').disabled = true;
     const px = app.pixels, top = topAcerto || (px ? topK(prever(app.modelo, px).probs, 3) : []), usado = SEGUNDOS - restante();
-    let pts = 0, msg = '';
-    if (motivo === 'acerto') { pts = 100 + Math.round(restante() * 5); msg = `A rede adivinhou: ${nomes[D.alvo]}!`; }
-    else if (motivo === 'pular') { msg = 'Rodada pulada.'; }
-    else if (top.slice(0, 3).some((o) => o.classe === D.alvo)) { pts = 30; msg = `Tempo esgotado, mas ${nomes[D.alvo]} apareceu entre os 3 palpites.`; }
-    else { msg = top.length ? `Tempo esgotado. A rede achou que era ${nomes[top[0].classe]}.` : 'Tempo esgotado sem desenho.'; }
+    let pts = 0, k = '', c = -1;
+    if (motivo === 'acerto') { pts = 100 + Math.round(restante() * 5); k = 'jogo.res.acerto'; c = D.alvo; }
+    else if (motivo === 'pular') { k = 'jogo.res.pulada'; }
+    else if (top.slice(0, 3).some((o) => o.classe === D.alvo)) { pts = 30; k = 'jogo.res.quase'; c = D.alvo; }
+    else if (top.length) { k = 'jogo.res.tempo'; c = top[0].classe; }
+    else { k = 'jogo.res.vazio'; }
     D.pontos += pts; D.hist.push({ alvo: D.alvo, motivo, pts, seg: usado, palpite: top[0] ? top[0].classe : -1 });
     infoBarra();
-    const idx = D.rodada, ultima = idx + 1 >= RODADAS;
-    tela.hidden = false;
-    tela.replaceChildren(
-      el('h3', { text: msg }), el('p', { text: pts ? `+${pts} pontos` : 'Sem pontos nesta rodada.' }),
-      el('button', { type: 'button', class: 'botao', id: 'ov-prox', text: ultima ? 'Ver resultado final' : 'Próxima rodada' }));
-    const aberto = performance.now(); // evita que um clique do traço ainda em andamento pule o resultado sem ser lido
-    const btn = $('#ov-prox');
-    btn.addEventListener('click', (ev) => { if (ev.detail > 0 && performance.now() - aberto < 700) return; if (D.fase !== 'resultado') return; D.rodada = idx + 1; if (ultima) telaFinal(); else novaRodada(); });
-    $('#ov-prox').focus();
+    const idx = D.rodada;
+    D.res = { k, c, pts, idx, ultima: idx + 1 >= RODADAS };
+    D.abertoEm = performance.now(); // evita que um clique do traço ainda em andamento pule o resultado sem ser lido
+    renderTela(true);
   }
   $('#btn-pular').addEventListener('click', () => encerrarRodada('pular'));
 
   function telaFinal() {
     D.fase = 'fim';
-    const novo = D.pontos > D.melhor; if (novo) { D.melhor = D.pontos; guardar('qd-melhor', D.melhor); }
-    const tab = el('table', {}, el('tr', {}, ...['Categoria', 'Resultado', 'Pontos'].map((t) => el('th', { text: t }))),
-      ...D.hist.map((h) => el('tr', {}, el('td', { text: nomes[h.alvo] }), el('td', { text: h.motivo === 'acerto' ? `acertou em ${fmtNum(h.seg, 1)} s` : h.motivo === 'pular' ? 'pulada' : h.pts ? 'quase (top 3)' : 'não acertou' }), el('td', { text: String(h.pts) }))));
-    tela.replaceChildren(el('h3', { text: `Total: ${fmtNum(D.pontos)} de ${RODADAS * (100 + SEGUNDOS * 5)} pontos` }),
-      el('p', { class: 'mini', text: novo ? 'Nova melhor pontuação neste navegador!' : `Melhor pontuação neste navegador: ${fmtNum(D.melhor)}.` }), tab,
-      el('button', { type: 'button', class: 'botao', id: 'ov-de-novo', text: 'Jogar de novo' }));
-    $('#ov-de-novo').addEventListener('click', comecar); $('#ov-de-novo').focus();
+    D.novoRecorde = D.pontos > D.melhor; if (D.novoRecorde) { D.melhor = D.pontos; guardar('qd-melhor', D.melhor); }
+    renderTela(true);
     $$('.chip').forEach((c) => c.classList.remove('alvo'));
-    $('#desafio-alvo').textContent = '...'; $('#btn-comecar').textContent = 'Começar desafio';
+    D.alvoVisivel = false; mostrarAlvo(); D.recomecar = false; rotuloComecar();
   }
 
+  // troca de idioma: reescreve só os textos; o desenho, o placar, o cronômetro e a rodada em curso continuam como estão
+  onLang(() => {
+    $$('.chip').forEach((c) => { c.textContent = N(Number(c.dataset.i)); });
+    $$('#sel-forma option').forEach((o) => { o.textContent = catNome(FORMAS[o.value].nome); });
+    escreverFrase();
+    if (ultimoTop) ultimoTop.forEach((o, i) => { linhas[i].children[0].textContent = N(o.classe); });
+    infoBarra(); rotuloComecar(); mostrarAlvo();
+    if (D.rUlt != null) textoTempo();
+    if (D.ativo) renderTela(false);
+  });
+
+  infoBarra(); rotuloComecar();
   redesenhar(); atualizar();
   // expõe um gancho para testes automatizados e para depuração
   window.__jogo = { estado: D, tracos: () => tracos };

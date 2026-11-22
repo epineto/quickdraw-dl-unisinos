@@ -8,6 +8,7 @@ import { iniciarErros } from './erros.js';
 import { iniciarDados } from './dados.js';
 import { iniciarResultados } from './resultados.js';
 import { iniciarTema } from './tema.js';
+import { iniciar as iniciarIdioma, onLang, t } from './i18n.js';
 
 /** Os CSV convertidos em JSON trazem números como texto; converte recursivamente o que parece número. */
 function numerizar(x) {
@@ -37,6 +38,7 @@ function navegacao() {
 }
 
 async function main() {
+  iniciarIdioma();
   iniciarTema();
   try {
     const [modelo, matriz, curvas, galeria, resumo] = await Promise.all([
@@ -44,9 +46,10 @@ async function main() {
     app.modelo = criarModelo(modelo);
     app.dados = { matriz: { ...matriz, pares_top: numerizar(matriz.pares_top), acc: Number(matriz.acc) }, curvas: numerizar(curvas), galeria, resumo };
   } catch (e) {
-    const a = $('#erro-carga');
+    const a = $('#erro-carga'), msg = () => t('erro.carga', { detalhe: e.message });
     a.hidden = false;
-    a.textContent = 'Não foi possível carregar o modelo e os dados. O laboratório precisa ser aberto por um servidor HTTP (por exemplo, python3 -m http.server) e não direto do arquivo. Detalhe: ' + e.message;
+    a.textContent = msg();
+    onLang(() => { a.textContent = msg(); });
     return;
   }
   navegacao();
