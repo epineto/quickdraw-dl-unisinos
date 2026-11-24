@@ -51,6 +51,7 @@ Requisitos: Python 3.10 ou mais novo, PyTorch (CPU), NumPy e Matplotlib. Os scri
 Imagens de 28 × 28 de um jogo; rabiscos no mouse ou no dedo diferem do treino. Só 18 categorias. Traço muito grosso derruba a rede (ver `#resultados`).
 
 ## Créditos e licenças
+- Subconjunto usado, sem compactação (arquivos `.npy` + CSV de categorias): [pasta pública no Google Drive](https://drive.google.com/open?id=1jaatjHdugsKNDyADAryGf6p8E6Qt5UOR)
 - Desenhos: [Quick, Draw!](https://github.com/googlecreativelab/quickdraw-dataset), Google Creative Lab, **CC BY 4.0** (subconjunto de 18 categorias, bitmaps 28 × 28).
 - Ha, D.; Eck, D. *A Neural Representation of Sketches*. arXiv:1704.03477, 2017.
 - Código: licença MIT (`LICENSE`). Autor: Epitácio Vicente do Nascimento Neto.
