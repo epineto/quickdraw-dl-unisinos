@@ -1,0 +1,58 @@
+modelo,transformacao,valor,acc
+mlp,deslocamento (pixels),0,0.8545
+mlp,deslocamento (pixels),1,0.8174
+mlp,deslocamento (pixels),2,0.7099
+mlp,deslocamento (pixels),3,0.5534
+mlp,deslocamento (pixels),4,0.3881
+mlp,deslocamento (pixels),6,0.172
+mlp,rotação (graus),0,0.8545
+mlp,rotação (graus),10,0.7904
+mlp,rotação (graus),20,0.5665
+mlp,rotação (graus),30,0.4025
+mlp,rotação (graus),45,0.3144
+mlp,escala (fator),0.6,0.0805
+mlp,escala (fator),0.8,0.4207
+mlp,escala (fator),1.0,0.8545
+mlp,escala (fator),1.2,0.5787
+mlp,escala (fator),1.4,0.3214
+mlp,espessura do traço,0,0.8545
+mlp,espessura do traço,1,0.6682
+mlp,espessura do traço,2,0.366
+cnn,deslocamento (pixels),0,0.8964
+cnn,deslocamento (pixels),1,0.8933
+cnn,deslocamento (pixels),2,0.8763
+cnn,deslocamento (pixels),3,0.8338
+cnn,deslocamento (pixels),4,0.7483
+cnn,deslocamento (pixels),6,0.4361
+cnn,rotação (graus),0,0.8964
+cnn,rotação (graus),10,0.8724
+cnn,rotação (graus),20,0.7601
+cnn,rotação (graus),30,0.5593
+cnn,rotação (graus),45,0.3911
+cnn,escala (fator),0.6,0.4568
+cnn,escala (fator),0.8,0.8434
+cnn,escala (fator),1.0,0.8964
+cnn,escala (fator),1.2,0.8355
+cnn,escala (fator),1.4,0.5702
+cnn,espessura do traço,0,0.8964
+cnn,espessura do traço,1,0.5913
+cnn,espessura do traço,2,0.2143
+cnn_aug,deslocamento (pixels),0,0.8961
+cnn_aug,deslocamento (pixels),1,0.8935
+cnn_aug,deslocamento (pixels),2,0.8872
+cnn_aug,deslocamento (pixels),3,0.8775
+cnn_aug,deslocamento (pixels),4,0.8484
+cnn_aug,deslocamento (pixels),6,0.6969
+cnn_aug,rotação (graus),0,0.8961
+cnn_aug,rotação (graus),10,0.8834
+cnn_aug,rotação (graus),20,0.8272
+cnn_aug,rotação (graus),30,0.6626
+cnn_aug,rotação (graus),45,0.4579
+cnn_aug,escala (fator),0.6,0.68
+cnn_aug,escala (fator),0.8,0.875
+cnn_aug,escala (fator),1.0,0.8961
+cnn_aug,escala (fator),1.2,0.8869
+cnn_aug,escala (fator),1.4,0.8101
+cnn_aug,espessura do traço,0,0.8961
+cnn_aug,espessura do traço,1,0.6147
+cnn_aug,espessura do traço,2,0.2983

@@ -1,0 +1,5 @@
+modelo,parametros,sementes,acc_media,acc_desvio_sementes,ic95_inf,ic95_sup,top3_media,segundos_treino_medio
+baseline,14130,3,0.6897,0.0002,0.6849,0.6945,0.8599,16.0
+mlp,236178,3,0.8492,0.0014,0.8455,0.8529,0.9461,65.8
+cnn,80434,3,0.9017,0.0041,0.8986,0.9047,0.9658,388.9
+cnn_aug,80434,2,0.8984,0.0009,0.8952,0.9014,0.9648,597.8

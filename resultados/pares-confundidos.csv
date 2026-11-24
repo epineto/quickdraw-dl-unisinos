@@ -1,0 +1,154 @@
+a,b,a_para_b,b_para_a,total,pct_do_par
+gato,cachorro,239,133,372,9.3
+cachorro,pássaro,91,106,197,4.92
+pássaro,avião,151,38,189,4.72
+árvore,flor,57,53,110,2.75
+estrela,avião,42,67,109,2.73
+cachorro,carro,41,52,93,2.33
+peixe,pássaro,31,57,88,2.2
+cachorro,bola de basquete,39,48,87,2.17
+pássaro,estrela,50,22,72,1.8
+bola de basquete,relógio,26,45,71,1.77
+cachorro,peixe,33,34,67,1.68
+gato,pássaro,31,31,62,1.55
+flor,pássaro,15,41,56,1.4
+carro,bicicleta,29,27,56,1.4
+círculo,relógio,40,15,55,1.38
+cachorro,avião,32,22,54,1.35
+peixe,avião,29,23,52,1.3
+gato,avião,29,19,48,1.2
+bola de basquete,bicicleta,41,6,47,1.18
+gato,estrela,21,24,45,1.12
+gato,sol,26,18,44,1.1
+cachorro,castelo,28,14,42,1.05
+bola de basquete,flor,19,23,42,1.05
+casa,castelo,27,15,42,1.05
+cachorro,guarda-chuva,23,18,41,1.03
+árvore,guarda-chuva,16,24,40,1.0
+sol,estrela,26,13,39,0.97
+árvore,pássaro,11,28,39,0.97
+gato,castelo,27,10,37,0.92
+carro,avião,20,17,37,0.92
+flor,avião,23,13,36,0.9
+cachorro,flor,17,17,34,0.85
+carro,peixe,10,22,32,0.8
+flor,guarda-chuva,11,20,31,0.78
+pássaro,guarda-chuva,21,10,31,0.78
+castelo,flor,2,28,30,0.75
+círculo,peixe,26,3,29,0.73
+gato,peixe,15,13,28,0.7
+castelo,pássaro,3,25,28,0.7
+cachorro,bicicleta,12,15,27,0.68
+cachorro,estrela,14,13,27,0.68
+flor,estrela,21,6,27,0.68
+cachorro,casa,11,15,26,0.65
+bola de basquete,castelo,23,2,25,0.62
+carro,pássaro,5,20,25,0.62
+círculo,bola de basquete,10,14,24,0.6
+sol,pássaro,8,16,24,0.6
+gato,flor,12,11,23,0.57
+círculo,pássaro,10,12,22,0.55
+gato,bicicleta,14,7,21,0.53
+castelo,árvore,5,16,21,0.53
+círculo,maçã,7,12,19,0.47
+maçã,bicicleta,19,0,19,0.47
+maçã,pássaro,14,5,19,0.47
+bicicleta,peixe,4,15,19,0.47
+gato,carro,7,11,18,0.45
+bola de basquete,pássaro,11,7,18,0.45
+castelo,peixe,2,16,18,0.45
+guarda-chuva,avião,9,9,18,0.45
+cachorro,árvore,12,5,17,0.43
+círculo,bicicleta,17,0,17,0.43
+bicicleta,pássaro,6,11,17,0.43
+maçã,relógio,11,5,16,0.4
+bicicleta,avião,8,8,16,0.4
+gato,maçã,10,5,15,0.38
+castelo,avião,4,11,15,0.38
+cachorro,sol,4,10,14,0.35
+castelo,estrela,2,12,14,0.35
+cachorro,círculo,1,12,13,0.33
+bola de basquete,casa,9,4,13,0.33
+bola de basquete,árvore,7,6,13,0.33
+bola de basquete,carro,7,6,13,0.33
+castelo,carro,7,6,13,0.33
+maçã,peixe,11,2,13,0.33
+peixe,estrela,7,6,13,0.33
+cachorro,relógio,5,7,12,0.3
+árvore,estrela,12,0,12,0.3
+sol,árvore,4,7,11,0.27
+sol,flor,5,6,11,0.27
+castelo,maçã,1,10,11,0.27
+árvore,avião,5,6,11,0.27
+flor,bicicleta,9,2,11,0.27
+castelo,guarda-chuva,2,8,10,0.25
+carro,guarda-chuva,1,9,10,0.25
+bicicleta,estrela,1,9,10,0.25
+pássaro,relógio,5,5,10,0.25
+gato,bola de basquete,7,2,9,0.22
+gato,árvore,4,4,8,0.2
+círculo,castelo,8,0,8,0.2
+sol,maçã,3,5,8,0.2
+sol,peixe,3,5,8,0.2
+bola de basquete,maçã,2,6,8,0.2
+bola de basquete,peixe,5,3,8,0.2
+bola de basquete,estrela,2,6,8,0.2
+casa,árvore,1,7,8,0.2
+casa,avião,2,6,8,0.2
+peixe,guarda-chuva,4,4,8,0.2
+círculo,sol,3,4,7,0.18
+círculo,casa,7,0,7,0.18
+casa,pássaro,4,3,7,0.18
+flor,peixe,2,5,7,0.18
+casa,estrela,3,3,6,0.15
+castelo,bicicleta,4,2,6,0.15
+maçã,flor,3,3,6,0.15
+maçã,guarda-chuva,1,5,6,0.15
+árvore,peixe,4,2,6,0.15
+peixe,relógio,1,5,6,0.15
+gato,casa,3,2,5,0.12
+gato,relógio,1,4,5,0.12
+círculo,carro,3,2,5,0.12
+casa,maçã,0,5,5,0.12
+castelo,relógio,1,4,5,0.12
+flor,carro,2,3,5,0.12
+carro,estrela,0,5,5,0.12
+cachorro,maçã,1,3,4,0.1
+círculo,guarda-chuva,2,2,4,0.1
+sol,carro,4,0,4,0.1
+sol,bicicleta,3,1,4,0.1
+sol,relógio,0,4,4,0.1
+sol,avião,4,0,4,0.1
+casa,bicicleta,2,2,4,0.1
+casa,relógio,2,2,4,0.1
+casa,guarda-chuva,0,4,4,0.1
+maçã,avião,4,0,4,0.1
+carro,relógio,0,4,4,0.1
+estrela,guarda-chuva,1,3,4,0.1
+círculo,avião,3,0,3,0.07
+sol,bola de basquete,2,1,3,0.07
+sol,guarda-chuva,0,3,3,0.07
+bola de basquete,avião,2,1,3,0.07
+bicicleta,relógio,0,3,3,0.07
+círculo,flor,0,2,2,0.05
+círculo,estrela,1,1,2,0.05
+sol,casa,1,1,2,0.05
+bola de basquete,guarda-chuva,2,0,2,0.05
+casa,flor,2,0,2,0.05
+casa,carro,0,2,2,0.05
+casa,peixe,1,1,2,0.05
+maçã,árvore,1,1,2,0.05
+maçã,estrela,1,1,2,0.05
+árvore,carro,2,0,2,0.05
+bicicleta,guarda-chuva,1,1,2,0.05
+relógio,estrela,0,2,2,0.05
+gato,círculo,0,1,1,0.03
+maçã,carro,1,0,1,0.03
+árvore,bicicleta,1,0,1,0.03
+árvore,relógio,0,1,1,0.03
+flor,relógio,0,1,1,0.03
+relógio,avião,1,0,1,0.03
+gato,guarda-chuva,0,0,0,0.0
+círculo,árvore,0,0,0,0.0
+sol,castelo,0,0,0,0.0
+relógio,guarda-chuva,0,0,0,0.0

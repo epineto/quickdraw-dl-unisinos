@@ -32,6 +32,21 @@ node --test tests/              # Node 18 ou mais novo
 ```
 Os testes comparam a inferência em JavaScript com os logits do PyTorch (`tests/amostras_teste.json`, 42 amostras, tolerância 1e-4; erro observado: cerca de 9e-6) e verificam o pré-processamento, as transformações e o mapa de oclusão. Os pesos foram regravados com 7 algarismos significativos por `tools/reexportar_pesos.py`.
 
+## Código de treino e notebook (Python)
+A pasta [`codigo/`](codigo) tem o que gerou os números: `baixar-dados.py` (baixa as primeiras 12.000 linhas de cada categoria do Quick, Draw!), `quickdraw.py` (modelos, treino, aumento de dados, avaliação e calibração), `treinar.py` (todos os experimentos), `gerar-figuras.py`, `exportar-pesos.py` (pesos para este laboratório) e o notebook completo. Os resultados (CSV e JSON) estão em [`resultados/`](resultados).
+
+[![Abrir no Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/epineto/quickdraw-dl-unisinos/blob/main/codigo/Trabalho02-DL-QuickDraw.ipynb)
+
+O notebook é autossuficiente: instala o que faltar, baixa os dados e funciona no computador e no Google Colab, sem GPU. No Colab, o padrão é o modo `RAPIDO` (poucos minutos, números diferentes dos do relatório); para o treino completo, trocar para `RAPIDO = False`.
+
+```bash
+cd codigo
+python baixar-dados.py          # cria ../dados/quickdraw-subconjunto.npz
+python treinar.py --rapido      # teste rápido; sem --rapido, treino completo (dezenas de minutos em CPU)
+python gerar-figuras.py
+```
+Requisitos: Python 3.10 ou mais novo, PyTorch (CPU), NumPy e Matplotlib. Os scripts esperam as pastas `dados/`, `resultados/`, `modelos/` e `figuras/` ao lado de `codigo/`; `dados/`, `modelos/` e `figuras/` são criadas na execução e não estão no repositório.
+
 ## Limites
 Imagens de 28 × 28 de um jogo; rabiscos no mouse ou no dedo diferem do treino. Só 18 categorias. Traço muito grosso derruba a rede (ver `#resultados`).
 

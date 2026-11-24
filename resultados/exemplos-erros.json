@@ -1,0 +1,326 @@
+[
+ {
+  "a": "gato",
+  "b": "cachorro",
+  "erros": [
+   {
+    "indice": 3582,
+    "real": "gato",
+    "previsto": "cachorro",
+    "confianca": 0.999
+   },
+   {
+    "indice": 6076,
+    "real": "gato",
+    "previsto": "cachorro",
+    "confianca": 0.99
+   },
+   {
+    "indice": 30548,
+    "real": "gato",
+    "previsto": "cachorro",
+    "confianca": 0.989
+   },
+   {
+    "indice": 16667,
+    "real": "gato",
+    "previsto": "cachorro",
+    "confianca": 0.988
+   },
+   {
+    "indice": 21217,
+    "real": "cachorro",
+    "previsto": "gato",
+    "confianca": 1.0
+   },
+   {
+    "indice": 7546,
+    "real": "cachorro",
+    "previsto": "gato",
+    "confianca": 1.0
+   },
+   {
+    "indice": 9184,
+    "real": "cachorro",
+    "previsto": "gato",
+    "confianca": 0.999
+   },
+   {
+    "indice": 31372,
+    "real": "cachorro",
+    "previsto": "gato",
+    "confianca": 0.998
+   }
+  ]
+ },
+ {
+  "a": "cachorro",
+  "b": "pássaro",
+  "erros": [
+   {
+    "indice": 15113,
+    "real": "cachorro",
+    "previsto": "pássaro",
+    "confianca": 0.982
+   },
+   {
+    "indice": 30793,
+    "real": "cachorro",
+    "previsto": "pássaro",
+    "confianca": 0.957
+   },
+   {
+    "indice": 33695,
+    "real": "cachorro",
+    "previsto": "pássaro",
+    "confianca": 0.955
+   },
+   {
+    "indice": 19954,
+    "real": "cachorro",
+    "previsto": "pássaro",
+    "confianca": 0.914
+   },
+   {
+    "indice": 9757,
+    "real": "pássaro",
+    "previsto": "cachorro",
+    "confianca": 0.968
+   },
+   {
+    "indice": 807,
+    "real": "pássaro",
+    "previsto": "cachorro",
+    "confianca": 0.967
+   },
+   {
+    "indice": 1709,
+    "real": "pássaro",
+    "previsto": "cachorro",
+    "confianca": 0.95
+   },
+   {
+    "indice": 11308,
+    "real": "pássaro",
+    "previsto": "cachorro",
+    "confianca": 0.936
+   }
+  ]
+ },
+ {
+  "a": "pássaro",
+  "b": "avião",
+  "erros": [
+   {
+    "indice": 25799,
+    "real": "pássaro",
+    "previsto": "avião",
+    "confianca": 0.997
+   },
+   {
+    "indice": 34131,
+    "real": "pássaro",
+    "previsto": "avião",
+    "confianca": 0.997
+   },
+   {
+    "indice": 22381,
+    "real": "pássaro",
+    "previsto": "avião",
+    "confianca": 0.995
+   },
+   {
+    "indice": 32963,
+    "real": "pássaro",
+    "previsto": "avião",
+    "confianca": 0.994
+   },
+   {
+    "indice": 9352,
+    "real": "avião",
+    "previsto": "pássaro",
+    "confianca": 0.966
+   },
+   {
+    "indice": 28317,
+    "real": "avião",
+    "previsto": "pássaro",
+    "confianca": 0.965
+   },
+   {
+    "indice": 33065,
+    "real": "avião",
+    "previsto": "pássaro",
+    "confianca": 0.936
+   },
+   {
+    "indice": 6228,
+    "real": "avião",
+    "previsto": "pássaro",
+    "confianca": 0.93
+   }
+  ]
+ },
+ {
+  "a": "árvore",
+  "b": "flor",
+  "erros": [
+   {
+    "indice": 3388,
+    "real": "árvore",
+    "previsto": "flor",
+    "confianca": 0.997
+   },
+   {
+    "indice": 17444,
+    "real": "árvore",
+    "previsto": "flor",
+    "confianca": 0.98
+   },
+   {
+    "indice": 9290,
+    "real": "árvore",
+    "previsto": "flor",
+    "confianca": 0.976
+   },
+   {
+    "indice": 6788,
+    "real": "árvore",
+    "previsto": "flor",
+    "confianca": 0.976
+   },
+   {
+    "indice": 27770,
+    "real": "flor",
+    "previsto": "árvore",
+    "confianca": 0.998
+   },
+   {
+    "indice": 32596,
+    "real": "flor",
+    "previsto": "árvore",
+    "confianca": 0.975
+   },
+   {
+    "indice": 7064,
+    "real": "flor",
+    "previsto": "árvore",
+    "confianca": 0.975
+   },
+   {
+    "indice": 29133,
+    "real": "flor",
+    "previsto": "árvore",
+    "confianca": 0.962
+   }
+  ]
+ },
+ {
+  "a": "estrela",
+  "b": "avião",
+  "erros": [
+   {
+    "indice": 18784,
+    "real": "estrela",
+    "previsto": "avião",
+    "confianca": 0.989
+   },
+   {
+    "indice": 33971,
+    "real": "estrela",
+    "previsto": "avião",
+    "confianca": 0.972
+   },
+   {
+    "indice": 1131,
+    "real": "estrela",
+    "previsto": "avião",
+    "confianca": 0.969
+   },
+   {
+    "indice": 31278,
+    "real": "estrela",
+    "previsto": "avião",
+    "confianca": 0.96
+   },
+   {
+    "indice": 26296,
+    "real": "avião",
+    "previsto": "estrela",
+    "confianca": 0.987
+   },
+   {
+    "indice": 13863,
+    "real": "avião",
+    "previsto": "estrela",
+    "confianca": 0.987
+   },
+   {
+    "indice": 27521,
+    "real": "avião",
+    "previsto": "estrela",
+    "confianca": 0.973
+   },
+   {
+    "indice": 24356,
+    "real": "avião",
+    "previsto": "estrela",
+    "confianca": 0.963
+   }
+  ]
+ },
+ {
+  "a": "cachorro",
+  "b": "carro",
+  "erros": [
+   {
+    "indice": 20840,
+    "real": "cachorro",
+    "previsto": "carro",
+    "confianca": 0.959
+   },
+   {
+    "indice": 6993,
+    "real": "cachorro",
+    "previsto": "carro",
+    "confianca": 0.953
+   },
+   {
+    "indice": 6966,
+    "real": "cachorro",
+    "previsto": "carro",
+    "confianca": 0.948
+   },
+   {
+    "indice": 14979,
+    "real": "cachorro",
+    "previsto": "carro",
+    "confianca": 0.938
+   },
+   {
+    "indice": 31589,
+    "real": "carro",
+    "previsto": "cachorro",
+    "confianca": 0.991
+   },
+   {
+    "indice": 21289,
+    "real": "carro",
+    "previsto": "cachorro",
+    "confianca": 0.978
+   },
+   {
+    "indice": 31182,
+    "real": "carro",
+    "previsto": "cachorro",
+    "confianca": 0.951
+   },
+   {
+    "indice": 30124,
+    "real": "carro",
+    "previsto": "cachorro",
+    "confianca": 0.937
+   }
+  ]
+ }
+]
